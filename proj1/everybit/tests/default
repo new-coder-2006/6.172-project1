@@ -60,3 +60,122 @@ e 00001011
 r 0 8 -11
 e 01011000
 
+#3: 8 bit subset left shift
+t 3
+n 10010110
+r 2 5 -2
+e 10011010
+
+#4: 8 bit large right shift
+t 4
+n 10010110
+r 2 5 7
+e 10110100
+
+#5: 8 bit full right shift
+t 5
+n 10010110
+r 0 8 8
+e 10010110
+
+#6: 8 bit full left shift
+t 6
+n 10010110
+r 0 8 -8
+e 10010110
+
+#7: Multibyte full right shift
+t 7
+n 1001011010110100
+r 0 16 2
+e 0010010110101101
+
+#8: Multibyte full left shift
+t 8
+n 1001011010110100
+r 0 16 -2
+e 0101101011010010
+
+#9: Multibyte subset right shift
+t 9
+n 1001011010110100
+r 10 5 2
+e 1001011010101100
+
+#10: Multibyte subset left shift
+t 10
+n 1001011010110100
+r 10 5 -2
+e 1001011010010110
+
+#11: Subset zero shift
+t 11
+n 10000101
+r 2 5 0
+e 10000101
+
+#12: Multibyte full zero shift
+t 12
+n 1001011010110100
+r 0 16 0
+e 1001011010110100
+
+#13: Multibyte subset zero shift
+t 13
+n 1001011010110100
+r 10 3 0
+e 1001011010110100
+
+#14: Multibyte byte-crossing right shift
+t 14
+n 1001011010110100
+r 7 8 4
+e 1001011101001010
+
+#15: Multibyte byte-crossing left shift
+t 15
+n 1001011010110100
+r 5 9 -6
+e 1001010111010100
+
+#16: Single Bit Right Shift
+t 16
+n 1001011010110100
+r 13 1 14
+e 1001011010110100
+
+#17: Single Bit Left Shift
+t 17
+n 1001011010110100
+r 2 1 109
+e 1001011010110100
+
+#18: Zero Length
+t 18
+n 1001011010110100
+r 2 0 1049
+e 1001011010110100
+
+#19: Empty Bit Array
+t 19
+n 
+r 2 0 100000000
+e 
+
+#20: Offset out of bounds
+t 20
+n 10010110
+r 9 3 10
+e 10010110
+
+#21: Small array
+t 21
+n 100
+r 0 2 1
+e 010
+
+#22: Length out of bounds
+t 22
+n 100
+r 0 5 1
+e 100

@@ -142,6 +142,21 @@ size_t bitarray_get_bit_sz(const bitarray_t* const bitarray) {
   return bitarray->bit_sz;
 }
 
+void reverseArray(bool arr[], ssize_t size) {
+    int start = 0;
+    int end = size - 1;
+    while (start < end) {
+        // Swap elements at start and end
+        int temp = arr[start];
+        arr[start] = arr[end];
+        arr[end] = temp;
+        
+        // Move towards the center
+        start++;
+        end--;
+    }
+}
+
 bool bitarray_get(const bitarray_t* const bitarray, const size_t bit_index) {
   assert(bit_index < bitarray->bit_sz);
 
@@ -184,17 +199,48 @@ void bitarray_randfill(bitarray_t* const bitarray){
 void bitarray_rotate(bitarray_t* const bitarray,
                      const size_t bit_offset,
                      const size_t bit_length,
-                     const ssize_t bit_right_amount) {
+                     ssize_t bit_right_amount) {
   assert(bit_offset + bit_length <= bitarray->bit_sz);
 
   if (bit_length == 0) {
     return;
   }
 
-  // Convert a rotate left or right to a left rotate only, and eliminate
-  // multiple full rotations.
-  bitarray_rotate_left(bitarray, bit_offset, bit_length,
-                       modulo(-bit_right_amount, bit_length));
+  if (bit_right_amount < 0) {
+    bit_right_amount = bit_length + bit_right_amount;
+  }
+  
+  bit_right_amount = bit_right_amount % bit_length;
+
+  bool bit_slice_left[bit_length - bit_right_amount];
+  bool bit_slice_right[bit_right_amount];
+
+  for (int i = 0; i < (bit_length - bit_right_amount); i++) {
+    bit_slice_left[i] = bitarray_get(bitarray, i + bit_offset);
+  }
+
+  for (int i = 0; i < bit_right_amount; i++) {
+    bit_slice_right[i] = bitarray_get(bitarray, i + bit_offset + (bit_length - bit_right_amount));
+  }
+
+  reverseArray(bit_slice_left, bit_length - bit_right_amount);
+  reverseArray(bit_slice_right, bit_right_amount);
+
+  bool combined_reversals[bit_length];
+
+  for (int i = 0; i < (bit_length - bit_right_amount); i++) {
+    combined_reversals[i] = bit_slice_left[i];
+  }
+
+  for (int i = 0; i < bit_right_amount; i++) {
+    combined_reversals[i + (bit_length - bit_right_amount)] = bit_slice_right[i];
+  }
+
+  reverseArray(combined_reversals, bit_length);
+
+  for (int i = 0; i < bit_length; i++) {
+    bitarray_set(bitarray, i + bit_offset, combined_reversals[i]);
+  }
 }
 
 static void bitarray_rotate_left(bitarray_t* const bitarray,
