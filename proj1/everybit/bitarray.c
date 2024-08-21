@@ -157,7 +157,7 @@ void reverseArray(bool arr[], ssize_t size) {
     }
 }
 
-bool bitarray_get(const bitarray_t* const bitarray, const size_t bit_index) {
+inline bool bitarray_get(const bitarray_t* const bitarray, const size_t bit_index) {
   assert(bit_index < bitarray->bit_sz);
 
   // We're storing bits in packed form, 8 per byte.  So to get the nth
@@ -172,7 +172,7 @@ bool bitarray_get(const bitarray_t* const bitarray, const size_t bit_index) {
          true : false;
 }
 
-void bitarray_set(bitarray_t* const bitarray,
+inline void bitarray_set(bitarray_t* const bitarray,
                   const size_t bit_index,
                   const bool value) {
   assert(bit_index < bitarray->bit_sz);
@@ -196,17 +196,6 @@ void bitarray_randfill(bitarray_t* const bitarray){
   }
 }
 
-void reverse_bits(bitarray_t* bitarray, size_t start, size_t end) {  
-  while (start < end) {
-    bool start_value = bitarray_get(bitarray, start);
-    bool end_value = bitarray_get(bitarray, end);
-    bitarray_set(bitarray, start, end_value);
-    bitarray_set(bitarray, end, start_value);
-    start++;
-    end--;
-  }
-}
-
 void bitarray_rotate(bitarray_t* const bitarray,
                      const size_t bit_offset,
                      const size_t bit_length,
@@ -223,19 +212,41 @@ void bitarray_rotate(bitarray_t* const bitarray,
   
   bit_right_amount = bit_right_amount % bit_length;
 
-  // Perform the three-step reversal
-  size_t first_part_end = bit_offset + bit_length - bit_right_amount - 1;
-  size_t second_part_start = bit_offset + bit_length - bit_right_amount;
-  size_t end = bit_offset + bit_length - 1;
-
   // Reverse the first part
-  reverse_bits(bitarray, bit_offset, first_part_end);
+  size_t left_length = bit_length - bit_right_amount;
+  size_t left_midpoint = bit_offset + (left_length / 2);
+
+  #pragma clang loop vectorize(enable)
+  for (int i = bit_offset; i < left_midpoint; i++) {
+    bool tmp = bitarray_get(bitarray, i);
+    size_t index_to_switch = left_length - 1 + bit_offset - (i - bit_offset); 
+    bitarray_set(bitarray, i, bitarray_get(bitarray, index_to_switch));
+    bitarray_set(bitarray, index_to_switch, tmp);
+  }
 
   // Reverse the second part
-  reverse_bits(bitarray, second_part_start, end);
+  size_t first_right_index = bit_offset + bit_length - bit_right_amount;
+  size_t second_right_index = bit_offset + bit_length - 1;
+
+  while (first_right_index < second_right_index) {
+    bool tmp = bitarray_get(bitarray, first_right_index);
+    bitarray_set(bitarray, 
+                 first_right_index, 
+                 bitarray_get(bitarray, second_right_index));
+    bitarray_set(bitarray, second_right_index, tmp);
+    first_right_index++;
+    second_right_index--;
+  }
 
   // Reverse the whole array
-  reverse_bits(bitarray, bit_offset, end);
+  size_t full_subset_midpoint = bit_offset + (bit_length / 2);
+  
+  for (int i = bit_offset; i < full_subset_midpoint; i++) {
+    bool tmp = bitarray_get(bitarray, i);
+    size_t index_to_switch = bit_length - 1 + bit_offset - (i - bit_offset); 
+    bitarray_set(bitarray, i, bitarray_get(bitarray, index_to_switch));
+    bitarray_set(bitarray, index_to_switch, tmp);
+  }
 }
 
 static void bitarray_rotate_left(bitarray_t* const bitarray,

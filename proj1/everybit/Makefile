@@ -67,6 +67,19 @@ else ifeq ($(PLATFORM),Darwin)
 	LDFLAGS += -arch x86_64 -framework CoreServices
 endif
 
+ifeq ($(VECTORIZE),1)
+  CFLAGS += -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -ffast-math
+else
+  CFLAGS += -fno-vectorize
+endif
+
+ifeq ($(ASSEMBLE),1)
+  CFLAGS += -S
+endif
+
+ifeq ($(AVX2),1)
+  CFLAGS += -mavx2
+endif
 
 # Determine which profile--debug or release--we should build against, and set
 # CFLAGS appropriately.
